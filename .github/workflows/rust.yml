@@ -1,0 +1,43 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os.name }}
+    runs-on: ${{ matrix.os.name }}
+    strategy:
+      matrix:
+        os:
+          - name: ubuntu-latest
+            exec: history_archiver
+          - name: windows-latest
+            exec: history_archiver.exe
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build
+      run: cargo build -r --verbose
+
+    - name: Run tests
+      run: cargo test -r --verbose
+
+    - name: Compress
+      uses: crazy-max/ghaction-upx@v2
+      with:
+        version: latest
+        files: target/release/${{ matrix.os.exec }}
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.os.exec }}
+        path: target/release/${{ matrix.os.exec }}
