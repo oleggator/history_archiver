@@ -1,0 +1,10 @@
+venv
+data.ms
+node_modules
+/target
+*.pyc
+.DS_Store
+/*.json
+*.gz
+*.backup
+.vscode
