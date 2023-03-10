@@ -1,0 +1,4 @@
+http://localhost:8081 {
+	root * frontend/public
+	file_server
+}
