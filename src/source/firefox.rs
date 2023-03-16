@@ -11,8 +11,7 @@ SELECT
 	moz_historyvisits.id AS id,
 	moz_historyvisits.visit_date AS visit_time,
 	moz_places.title AS title,
-	moz_places.url AS url,
-	moz_places.rev_host AS domain_expansion
+	moz_places.url AS url
 FROM
 	moz_historyvisits
 JOIN moz_places ON moz_historyvisits.place_id = moz_places.id
@@ -47,8 +46,6 @@ impl Source for Firefox {
                     })?,
                     title: row.get("title")?,
                     url: row.get("url")?,
-                    domain_expansion: row.get("domain_expansion")?,
-                    status_code: 0,
                     tags: vec![],
                     source: Self::NAME.to_owned(),
                 })

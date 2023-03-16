@@ -48,8 +48,6 @@ impl Source for Chrome {
                     })?,
                     title: row.get("title")?,
                     url: row.get("url")?,
-                    domain_expansion: None,
-                    status_code: 0,
                     tags: vec![],
                     source: Self::NAME.to_owned(),
                 })

@@ -24,12 +24,6 @@ pub struct Visit {
     pub url: String,
 
     ///
-    pub domain_expansion: Option<String>,
-
-    ///
-    pub status_code: i64,
-
-    ///
     pub tags: Vec<String>,
 
     ///

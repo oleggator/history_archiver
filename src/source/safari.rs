@@ -12,8 +12,6 @@ SELECT
 	history_visits.visit_time as visit_time,
 	history_visits.title as title,
 	history_items.url as url,
-	history_items.domain_expansion as domain_expansion,
-	history_items.status_code as status_code,
 	(
 		SELECT json_group_array(history_tags.title) from history_items_to_tags
 		JOIN history_tags ON history_items_to_tags.tag_id = history_tags.id
@@ -58,8 +56,6 @@ impl Source for Safari {
                         })?,
                     title: row.get("title")?,
                     url: row.get("url")?,
-                    domain_expansion: row.get("domain_expansion")?,
-                    status_code: row.get("status_code")?,
                     tags: serde_json::from_str(&tags_json).map_err(|err| {
                         rusqlite::Error::FromSqlConversionFailure(0, Type::Text, Box::new(err))
                     })?,
