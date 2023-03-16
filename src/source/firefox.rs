@@ -109,7 +109,7 @@ fn get_default_firefox_dir() -> Result<PathBuf> {
 }
 
 #[cfg(target_os = "windows")]
-fn get_default_firefox_dir() -> Option<PathBuf> {
+fn get_default_firefox_dir() -> Result<PathBuf> {
     let home_dir = std::env::var("APPDATA")?;
     let firefox_path = Path::new(&home_dir).join("Mozilla/Firefox");
 
@@ -117,7 +117,7 @@ fn get_default_firefox_dir() -> Option<PathBuf> {
 }
 
 #[cfg(target_os = "linux")]
-fn get_default_firefox_dir() -> Option<PathBuf> {
+fn get_default_firefox_dir() -> Result<PathBuf> {
     let home_dir = std::env::var("HOME")?;
     let firefox_path = Path::new(&home_dir).join(".mozilla/firefox");
 

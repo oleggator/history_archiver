@@ -11,15 +11,17 @@ env:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os.name }}
-    runs-on: ${{ matrix.os.name }}
+    name: Build on ${{ matrix.os.runs-on }}
+    runs-on: ${{ matrix.os.runs-on }}
     strategy:
       matrix:
         os:
-          - name: ubuntu-latest
+          - runs-on: ubuntu-latest
             exec: history_archiver
-          - name: windows-latest
+            artifact_name: history_archiver_linux
+          - runs-on: windows-latest
             exec: history_archiver.exe
+            artifact_name: history_archiver_windows.exe
 
     steps:
     - uses: actions/checkout@v3
@@ -39,5 +41,34 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.os.exec }}
+        name: ${{ matrix.os.artifact_name }}
         path: target/release/${{ matrix.os.exec }}
+
+  build_macos:
+    name: Build on macos
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: aarch64-apple-darwin
+        profile: minimal
+        override: true
+
+    - name: Run tests
+      run: cargo test --target=x86_64-apple-darwin -r --verbose
+
+    - name: Build
+      run: |
+        cargo build --target=aarch64-apple-darwin -r --verbose
+        cargo build --target=x86_64-apple-darwin -r --verbose
+        lipo -create -output history_archiver_macos target/aarch64-apple-darwin/release/history_archiver target/x86_64-apple-darwin/release/history_archiver
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: history_archiver_macos
+        path: history_archiver_macos

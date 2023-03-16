@@ -6,6 +6,7 @@ use crate::destination::meilisearch::Meilisearch;
 use crate::destination::Destination;
 use crate::source::chrome::Chrome;
 use crate::source::firefox::Firefox;
+#[cfg(target_os = "macos")]
 use crate::source::safari::Safari;
 use crate::source::Source;
 
@@ -20,6 +21,7 @@ pub struct Config {
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum SourceConfig {
+    #[cfg(target_os = "macos")]
     #[serde(rename = "safari")]
     Safari(SafariConfig),
 
@@ -33,6 +35,7 @@ pub enum SourceConfig {
 impl SourceConfig {
     pub fn create(&self) -> Result<Box<dyn Source>> {
         let src: Box<dyn Source> = match self {
+            #[cfg(target_os = "macos")]
             SourceConfig::Safari(_src_config) => Box::new(Safari::new_default()?),
             SourceConfig::Firefox(_src_config) => Box::new(Firefox::new_default()?),
             SourceConfig::Chrome(_src_config) => Box::new(Chrome::new_default()?),
@@ -41,6 +44,7 @@ impl SourceConfig {
     }
 }
 
+#[cfg(target_os = "macos")]
 #[derive(Deserialize, Debug)]
 pub struct SafariConfig {
     pub path: Option<String>,
