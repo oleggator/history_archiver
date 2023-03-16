@@ -1,7 +1,7 @@
 venv
 data.ms
 node_modules
-/target
+target
 *.pyc
 .DS_Store
 /*.json

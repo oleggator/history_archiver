@@ -27,22 +27,24 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Build
+      working-directory: history_archiver
       run: cargo build -r --verbose
 
     - name: Run tests
+      working-directory: history_archiver
       run: cargo test -r --verbose
 
     - name: Compress
       uses: crazy-max/ghaction-upx@v2
       with:
         version: latest
-        files: target/release/${{ matrix.os.exec }}
+        files: history_archiver/target/release/${{ matrix.os.exec }}
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.os.artifact_name }}
-        path: target/release/${{ matrix.os.exec }}
+        path: history_archiver/target/release/${{ matrix.os.exec }}
 
   build_macos:
     name: Build on macos
@@ -59,9 +61,11 @@ jobs:
         override: true
 
     - name: Run tests
+      working-directory: history_archiver
       run: cargo test --target=x86_64-apple-darwin -r --verbose
 
     - name: Build
+      working-directory: history_archiver
       run: |
         cargo build --target=aarch64-apple-darwin -r --verbose
         cargo build --target=x86_64-apple-darwin -r --verbose
@@ -71,4 +75,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: history_archiver_macos
-        path: history_archiver_macos
+        path: history_archiver/history_archiver_macos
