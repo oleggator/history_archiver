@@ -13,6 +13,7 @@ pub struct Meilisearch {
 
 impl Meilisearch {
     const PRIMARY_KEY: &'static str = "visit_time";
+    const NAME: &'static str = "meilisearch";
 
     pub fn new(host: impl Into<String>, api_key: impl Into<String>) -> Meilisearch {
         let client = Client::new(host, api_key);
@@ -21,8 +22,6 @@ impl Meilisearch {
 }
 
 impl Destination for Meilisearch {
-    const NAME: &'static str = "meilisearch";
-
     fn push_visits(&self, visits: &Vec<Visit>) -> Result<()> {
         let index = self.client.index("visits");
 
@@ -33,7 +32,7 @@ impl Destination for Meilisearch {
                 .wait_for_task(
                     task_info,
                     Some(Duration::from_secs(1)),
-                    Some(Duration::from_secs(20)),
+                    Some(Duration::from_secs(60)),
                 )
                 .await?;
 
@@ -47,4 +46,6 @@ impl Destination for Meilisearch {
 
         Ok(())
     }
+
+    fn name(&self) -> &'static str { Self::NAME }
 }

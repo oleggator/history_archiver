@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use super::Result;
 use super::Source;
 use crate::model::Visit;
@@ -29,14 +31,26 @@ pub struct Safari {
 }
 
 impl Safari {
-    pub fn new(path: &str) -> Result<Safari> {
-        let conn = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
+    const NAME: &'static str = "safari";
+
+    pub fn new(path: &impl AsRef<Path>) -> Result<Safari> {
+        let conn = Connection::open_with_flags(
+            path,
+            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )?;
         Ok(Safari { conn })
+    }
+
+    pub fn new_default() -> Result<Safari> {
+        let home_dir = std::env::var("HOME")?;
+        let db_path = Path::new(&home_dir).join("Library/Safari/History.db");
+
+        Self::new(&db_path)
     }
 }
 
 impl Source for Safari {
-    const NAME: &'static str = "safari";
+    fn name(&self) -> &'static str { Self::NAME }
 
     fn get_visits(&self) -> Result<Vec<Visit>> {
         let mut stmt = self.conn.prepare(QUERY)?;

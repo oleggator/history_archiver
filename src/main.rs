@@ -1,35 +1,52 @@
+mod config;
 mod destination;
 mod model;
 mod source;
 
-use destination::{file::File, Destination, meilisearch::Meilisearch};
-use source::{chrome::Chrome, firefox::Firefox, safari::Safari, Source};
+use std::fs::File;
+use std::time::Instant;
 
-fn main() {
-    let safari_path = "/Users/o.utkin/Library/Safari/History.db";
-    // export(
-    //     Safari::new(safari_path).unwrap(),
-    //     File::new("visits_safari.json"),
-    // );
-    export(
-        Safari::new(safari_path).unwrap(),
-        Meilisearch::new("http://localhost:7700", "IpWpkU9a6ixB3tLZha6HX-rZCAJCehlfq6roEyedk98"),
-    );
+use clap::Parser;
 
-    // let firefox_path = "/Users/o.utkin/Library/Application Support/Firefox/Profiles/2qs1beu4.default/places.sqlite";
-    // export(
-    //     Firefox::new(firefox_path).unwrap(),
-    //     File::new("visits_firefox.json"),
-    // );
-
-    // let chrome_path = "/Users/o.utkin/Library/Application Support/Google/Chrome/Default/History";
-    // export(
-    //     Chrome::new(chrome_path).unwrap(),
-    //     File::new("visits_chrome.json"),
-    // );
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    #[arg(short, long, default_value = "config.yml")]
+    config: String,
 }
 
-fn export(src: impl Source, dst: impl Destination) {
-    let visits = src.get_visits().unwrap();
-    dst.push_visits(&visits).unwrap();
+fn main() {
+    let args = Args::parse();
+    let config: config::Config = {
+        let config_file = File::open(args.config).unwrap();
+        serde_yaml::from_reader(config_file).unwrap()
+    };
+
+    let mut sources = vec![];
+    for source_config in config.sources {
+        let src = source_config.create().unwrap();
+        sources.push(src)
+    }
+
+    let mut destinations = vec![];
+    for destination_config in config.destinations {
+        destinations.push(destination_config.create().unwrap());
+    }
+
+    for src in sources {
+        for dst in &destinations {
+            let start = Instant::now();
+            let visits = src.get_visits().unwrap();
+            dst.push_visits(&visits).unwrap();
+            let duration = start.elapsed();
+
+            println!(
+                "Copied {} records from {} to {} in {} seconds",
+                visits.len(),
+                src.name(),
+                dst.name(),
+                duration.as_secs(),
+            )
+        }
+    }
 }

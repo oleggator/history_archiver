@@ -1,9 +1,10 @@
 use super::Result;
 use super::Source;
 use crate::model::Visit;
-
 use rusqlite::types::Type;
 use rusqlite::{Connection, OpenFlags};
+use std::path::Path;
+use std::path::PathBuf;
 use time::OffsetDateTime;
 
 const QUERY: &str = "
@@ -24,14 +25,26 @@ pub struct Chrome {
 }
 
 impl Chrome {
-    pub fn new(path: &str) -> Result<Chrome> {
-        let conn = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
+    const NAME: &'static str = "chrome";
+    
+    pub fn new(path: &impl AsRef<Path>) -> Result<Chrome> {
+        let conn = Connection::open_with_flags(
+            path,
+            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )?;
         Ok(Chrome { conn })
+    }
+
+    pub fn new_default() -> Result<Chrome> {
+        let chrome_dir = get_default_chrome_dir()?;
+        let db_path = chrome_dir.join("Default/History");
+
+        Self::new(&db_path)
     }
 }
 
 impl Source for Chrome {
-    const NAME: &'static str = "chrome";
+    fn name(&self) -> &'static str { Self::NAME }
 
     fn get_visits(&self) -> Result<Vec<Visit>> {
         let mut stmt = self.conn.prepare(QUERY)?;
@@ -57,4 +70,28 @@ impl Source for Chrome {
 
         Ok(visits)
     }
+}
+
+#[cfg(target_os = "macos")]
+fn get_default_chrome_dir() -> Result<PathBuf> {
+    let home_dir = std::env::var("HOME")?;
+    let chrome_dir = Path::new(&home_dir).join("Library/Application Support/Google/Chrome");
+
+    Ok(chrome_dir)
+}
+
+#[cfg(target_os = "windows")]
+fn get_default_chrome_dir() -> Result<PathBuf> {
+    let home_dir = std::env::var("HOME")?;
+    let chrome_dir = Path::new(&home_dir).join("/AppData/Local/Google/Chrome/User Data");
+
+    Ok(chrome_dir)
+}
+
+#[cfg(target_os = "linux")]
+fn get_default_chrome_dir() -> Result<PathBuf> {
+    let home_dir = std::env::var("HOME")?;
+    let chrome_dir = Path::new(&home_dir).join(".config/google-chrome");
+
+    Ok(chrome_dir)
 }

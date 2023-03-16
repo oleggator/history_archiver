@@ -1,0 +1,8 @@
+sources:
+  - type: firefox
+  - type: chrome
+  - type: safari
+destinations:
+  - type: meilisearch
+    address: http://localhost:7700
+    api_key: 'API KEY'

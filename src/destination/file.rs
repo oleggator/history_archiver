@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use super::Result;
 use crate::model::Visit;
 // use flate2::Compression;
@@ -7,20 +9,20 @@ use crate::model::Visit;
 use super::Destination;
 
 pub struct File {
-    path: String,
+    path: PathBuf,
 }
 
 impl File {
-    pub fn new(path: &str) -> File {
+    const NAME: &'static str = "file";
+
+    pub fn new(path: &impl AsRef<Path>) -> File {
         File {
-            path: path.to_owned(),
+            path: path.as_ref().to_owned(),
         }
     }
 }
 
 impl Destination for File {
-    const NAME: &'static str = "file";
-
     fn push_visits(&self, visits: &Vec<Visit>) -> Result<()> {
         let file = std::fs::File::create(&self.path)?;
         let writer = file;
@@ -34,4 +36,6 @@ impl Destination for File {
 
         Ok(())
     }
+
+    fn name(&self) -> &'static str { Self::NAME }
 }
