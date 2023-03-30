@@ -84,10 +84,6 @@ pub fn get_default_profile_path(firefox_dir_path: &Path) -> Option<PathBuf> {
             _ => None,
         })?;
 
-    if profile.get("Default")? != "1" {
-        return None;
-    }
-
     let profile_path = Path::new(profile.get("Path")?);
 
     let is_path_relative = profile.get("IsRelative")? == "1";
