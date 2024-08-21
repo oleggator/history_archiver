@@ -19,7 +19,7 @@ tasks:
 	curl 'http://localhost:7700/tasks' | jq
 
 ui:
-	cd frontend/history && npm run dev
+	cd frontend && npm run dev
 
 start:
 	meilisearch --http-payload-size-limit=1GB
