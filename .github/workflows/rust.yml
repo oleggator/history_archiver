@@ -60,6 +60,12 @@ jobs:
         profile: minimal
         override: true
 
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: x86_64-apple-darwin
+        profile: minimal
+
     - name: Run tests
       working-directory: history_archiver
       run: cargo test --target=x86_64-apple-darwin -r --verbose
