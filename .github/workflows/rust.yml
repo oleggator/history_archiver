@@ -41,7 +41,7 @@ jobs:
         files: history_archiver/target/release/${{ matrix.os.exec }}
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.os.artifact_name }}
         path: history_archiver/target/release/${{ matrix.os.exec }}
@@ -78,7 +78,7 @@ jobs:
         lipo -create -output history_archiver_macos target/aarch64-apple-darwin/release/history_archiver target/x86_64-apple-darwin/release/history_archiver
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: history_archiver_macos
         path: history_archiver/history_archiver_macos
